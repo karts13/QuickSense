@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,10 +20,12 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button start, stop;
+    Button start, stop, submit;
     LinearLayout linearLayout;
     TextView resultTime;
+    EditText uname;
     View colorBlock;
+    DatabaseConnection dbconnection;
 
     Runnable runnable = new Runnable() {
         @Override
@@ -41,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
                     long reflexTime = time1 - time;
                     resultTime = findViewById(R.id.result);
-                    resultTime.setText("Your reflexes took " + reflexTime + " milliseconds to react");
+                    resultTime.setText(String.valueOf(reflexTime));
                     colorBlock.setBackgroundResource(0);
                 }
             });
@@ -54,10 +58,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         linearLayout = findViewById(R.id.main);
+        uname = findViewById(R.id.name);
         start = findViewById(R.id.btnStart);
         stop = findViewById(R.id.btnStop);
-        resultTime = findViewById(R.id.result); // Initialize resultTime here
-        colorBlock = findViewById(R.id.colorBlock); // Initialize colorBlock here
+        submit = findViewById(R.id.btnSubmit);
+        resultTime = findViewById(R.id.result);
+        colorBlock = findViewById(R.id.colorBlock);
+        dbconnection = new DatabaseConnection(this);
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,6 +75,22 @@ public class MainActivity extends AppCompatActivity {
                 // call the runnable function after a post dealy of num seconds
                 Handler handler = new Handler();
                 handler.postDelayed(runnable, num * 1000);
+            }
+        });
+
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userName =uname.getText().toString();
+                String res = resultTime.getText().toString();
+
+                boolean result = dbconnection.insertData(userName, res);
+                if (result == true) {
+                    uname.setText("");
+                    resultTime.setText("");
+                }
+                else
+                    Toast.makeText(getApplicationContext(),"Data Not Inserted", Toast.LENGTH_LONG).show();
             }
         });
     }
